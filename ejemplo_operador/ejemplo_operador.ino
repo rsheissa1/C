@@ -8,12 +8,12 @@
  */
 
  // Bibliotecas
-#include <Serial.h>
+// #include <Serial.h>
  // Constantes
 
 // Variables
 int dato = 0;
-
+double timeStart, timeFinish;
  // Definición de objetos
 
  // Condiciones iniciales - Se ejectua sólo una vez al energizar
@@ -23,6 +23,7 @@ int dato = 0;
   // Aquí va código
   Serial.begin(115200); // Establece comunicación serial y velocidad de transmisión
   Serial.println("Comunicacion Serial iniciada");
+  delay(5000);
  } // Fin void setup
 
 // Cuerpo del programa - Se ejecuta constantemente
@@ -30,16 +31,34 @@ void loop()
 { // Inicio de void loop
   // Coloca código aquí, para ejecutarse indefinidamente
 
-  // Incremento
-  //dato = dato +1;
-  dato++;
+  timeStart = micros();
 
-  if (dato > 8)
+  for (int i = 0; i < 1000; i++)
   {
-    dato = 0;
+    dato++;
+    if (dato > 8)
+    {
+      dato = 0;
+    }
   }
 
-  //dato %= 8;
+  timeFinish = micros();
+  Serial.print("Con if");
+  Serial.println(timeFinish - timeStart); // Imprimir valor del contador
+  delay(1000);
+
+  timeStart = micros();
+
+  for (int i = 0; i < 1000 ; i++)
+  {
+    dato++;
+    dato %= 8;
+  }
+
+  timeFinish = micros();
+  Serial.print("Con operadores");
+  Serial.println(timeFinish - timeStart); // Imprime valor del contador
+  delay(1000);
   
 } // Fin void loop
 
