@@ -20,15 +20,24 @@
 #include <DHT.h>
 
 // Definición de objetos
-#define DHTPIN 14     // Digital pin connected to the DHT sensor from ESP32
+#define DHTPIN 12     // Digital pin connected to the DHT sensor from ESP32
 #define DHTTYPE DHT11 // DHT 11
 
-// Constantes
-const int BOTON1 = 4;
-const int LED1 = 2;
+// Constantes para Botones
+const int BOTON1 = 14;
+const int BOTON2 = 15;
+const int BOTON3 = 13;
+// Constantes para LEDs
+const int LED1 = 4;
+const int LED2 = 2;
+// Nivel de temperatura
+const int TEMP_H = 28;
 
 // Variables
-int dato1;
+int boton1_dato;
+int boton2_dato;
+int boton3_dato;
+
 DHT dht(DHTPIN, DHTTYPE);
 
 
@@ -38,14 +47,15 @@ DHT dht(DHTPIN, DHTTYPE);
   // Inicio void de void setup()
   // Aquí va código
   pinMode (BOTON1, INPUT_PULLUP); // Configurar el pin donde se conecta el boton como entrada
+  pinMode (BOTON2, INPUT_PULLUP);
+  pinMode (BOTON3, INPUT_PULLUP);
   pinMode (LED1, OUTPUT); // Configura el pin donde se conecta el led como salida
-  digitalWrite (LED1, LOW); // 0, false, LOW, 1, ture, HIGH
+  pinMode (LED2, OUTPUT);
 
-  
   Serial.begin(9600); // Establece comunicación serial y velocidad de transmisión
   Serial.println("DHT11 configurado");
   
-  dht.begin(); // Activa la función del sensore
+  dht.begin(); // Activa la comunicación del sensor DHT11
  } // Fin void setup
 
 // Cuerpo del programa - Se ejecuta constantemente
@@ -53,36 +63,55 @@ void loop()
 { // Inicio de void loop
   // Coloca código aquí, para ejecutarse indefinidamente
 
-  dato1 = digitalRead(BOTON1); // Lectura digital de boton1
-  digitalWrite(LED1,dato1);
-  
   // Wait a few seconds between measurements.
   delay(2000);
 
+  //*********Lectura del sensor **********
   // Reading temperature or humidity takes about 250 milliseconds!
   // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
-  float h = dht.readHumidity();
-  // Read temperature as Celsius (the default)
   float t = dht.readTemperature();
-  
-  // Check if any reads failed and exit early (to try again).
-  if (isnan(h) || isnan(t))
+  // Check if any reads failed from DHT sensor
+  if (isnan(t))
   {
     Serial.println(F("Failed to read from DHT sensor!"));
     return;
   }
 
-  // Compute heat index in Celsius (isFahreheit = false)
-  float hic = dht.computeHeatIndex(t, h, false);
-
-  Serial.print(F("Humidity: "));
-  Serial.print(h);
-  Serial.print(F("%  Temperature: "));
+  Serial.print(F("% Temperature: "));
   Serial.print(t);
-  Serial.print(F("°C "));
-  Serial.print(F("Heat index: "));
-  Serial.print(hic);
-  Serial.print(F("°C"));
+  
+  //*********Lectura del boton1********
+  boton1_dato = digitalRead(BOTON1);
+  if (boton1_dato == 1)
+  {
+    digitalWrite(LED1, LOW);
+  }
+  else
+  {
+    digitalWrite(LED1, HIGH);
+  }
+
+  //*********Automático por temperatura*****
+  if (t > TEMP_H)
+  {
+    digitalWrite(LED2,HIGH);
+  }
+  else
+  {
+    digitalWrite(LED2,LOW);
+  }
+
+  //*******Automático por temperatura, sobrecarga y alta demanda******
+  boton2_dato = digitalRead(BOTON2);
+  boton3_dato = digitalRead(BOTON3);
+  if ((t > TEMP_H) || (boton2_dato == 1) || (boton3_dato == 1))
+  {
+    digitalWrite(LED2, HIGH);
+  }
+  else
+  {
+    digitalWrite(LED2,LOW);
+  }
   
 } // Fin void loop
 
